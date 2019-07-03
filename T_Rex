@@ -1,0 +1,165 @@
+import pygame
+import random
+pygame.init()
+
+w = 1350
+h = 400
+screen = pygame.display.set_mode((w,h))
+pygame.display.set_caption("Dino game")
+
+c = pygame.time.Clock()
+
+bg = pygame.image.load("backm.jpg")
+bgx = 0
+bgx2 = 1350
+bg = pygame.transform.scale(bg , (1350,1400))
+
+white= (255,255,255)
+
+walk = [pygame.image.load("dinom1.png"),pygame.image.load("dinom2.png")]
+
+tree1 = pygame.image.load("treem1.png")
+tree2 = pygame.image.load("treem2.png")
+tree3 = pygame.image.load("treem3.png")
+tree4 = pygame.image.load("treem4.png")
+tree5 = pygame.image.load("treem5.png")
+
+dino1 = pygame.image.load("dinom1.png")
+dino2 = pygame.image.load("dinom2.png")
+stand = pygame.image.load("dinom3.png")
+gameOver_dino = pygame.image.load("dinom4.png")
+
+class T_Rex():
+
+    def __init__(self, x, y, width, height):
+        
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.sp = 10
+        self.isJump = False
+        self.jumpCount = 10
+        self.right = True
+        self.walkCount = 0
+        self.count = 0
+        self.count1 = 0
+        self.x1 = 0
+        self.hitbox = (self.x+20, self.y, 28, 60)
+        self.total = self.count + self.count1
+
+
+    def draw(self, screen):
+        if self.walkCount +1 >= 4:
+            self.walkCount = 0
+        if self.right:
+            screen.blit(walk[self.walkCount//2], (self.x, self.y))
+            self.walkCount += 1
+            self.count += 1
+        elif self.isJump == True: 
+            screen.blit(stand , (self.x,self.y)) 
+        self.hitbox = (self.x, self.y, 80, 85)
+        
+        font = pygame.font.Font(None, 30)
+        self.total = self.count + self.count1
+        score_txt = font.render("Dino Score : " + str(self.total), 1, (0,0,0))
+        screen.blit(score_txt, (1050,85))
+
+
+class Tree():
+    def __init__(self, x, y, width,height):
+        self.x = x
+        self.y = y
+        self.vel = 14
+        self.width = width
+        self.height = height
+        self.countTree = 0
+        self.hitbox =  (self.x, self.y, self.width, self.height)
+    
+    def draw(self, screen):
+        screen.blit(tree3, (self.x + 55, self.y))
+        screen.blit(tree4, (self.x + 1450, 320))
+        screen.blit(tree1, (self.x + 1200, self.y))
+        screen.blit(tree5, (self.x + 800, self.y))
+        screen.blit(tree4, (self.x - 200, 320))
+        
+        if self.x < -1350 :
+            self.x = 1350 
+        self.x -= 14
+        print(self.x)
+        
+    
+    def hit(self, screen):
+        if  self.x + 80< dino.x + 80 and dino.x + 80 < self.x + 250 and dino.y -40 + 85 > self.y  :
+            pygame.quit()
+        if  self.x + 850 < dino.x + 80 and dino.x + 80 < self.x + 1000 and dino.y -40 + 85 > self.y  :
+            pygame.quit()
+            
+        
+def redrawGame():
+    
+    screen.blit(bg, (bgx , -400))
+    screen.blit(bg, (bgx2 , -400))
+    #tree.draw2(screen)
+    tree.draw(screen)
+    # print(bgx)
+    # screen.blit(tree3, (bgx , 280))
+    # t1=pygame.draw.rect(screen, white, (bgx,280,93,87),2 )
+        
+    # screen.blit(tree1, (bgx2 , 280))
+    # t2=pygame.draw.rect(screen, (255,0,0), (bgx2,280,60,87),2 )
+        
+    # screen.blit(tree4, (bgx2 + 400 , 320))
+    # t3=pygame.draw.rect(screen, (255,0,0), (bgx2+400,320,25,50),2 )
+        
+    # screen.blit(tree5, (bgx2 + 900 , 280))
+    # t4=pygame.draw.rect(screen, (255,0,0), (bgx2+900,280,87,87),2 )
+        
+    # screen.blit(tree2, (bgx + 800 , 280))
+    # t5=pygame.draw.rect(screen, (255,0,0), (bgx+800,280,58,87),2 )
+    tree.hit(screen)
+    dino.draw(screen)
+    pygame.display.update()
+    
+    
+dino = T_Rex(200, 282, 1350, 400)  
+tree = Tree(0,280,93,87)
+#tree2 = Tree(500, 280, 93, 87)
+run = True
+while run :
+    bgx -= 14
+    bgx2 -= 14
+    if bgx < bg.get_width() * -1 :
+        bgx = bg.get_width()   
+    if bgx2 < bg.get_width() * -1 :
+        bgx2 = bg.get_width()
+
+       
+    c.tick(20)
+    keys = pygame.key.get_pressed()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+            run = False
+    if not(dino.isJump):
+        if keys[pygame.K_SPACE] or keys[pygame.K_UP] :
+            sound_jump = pygame.mixer.music.load("jump.mp3")
+            pygame.mixer.music.play(1, (0.0))
+            dino.count1 += 1
+            dino.isJump = True
+            dino.right = False
+        else:
+            pygame.mixer.music.stop()
+    else:       
+        if dino.jumpCount >= -10:
+            neg = 1
+            if dino.jumpCount < 0:
+                neg = -1
+            dino.y -= (dino.jumpCount**2)*0.7*neg
+            dino.jumpCount -= 1
+        else:
+            dino.isJump = False
+            dino.right = True
+            dino.jumpCount = 10
+            
+    redrawGame()
+pygame.quit()
